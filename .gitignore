@@ -127,3 +127,7 @@ dist
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# wwebjs sessions
+.wwebjs_auth
+.wwebjs_cache
