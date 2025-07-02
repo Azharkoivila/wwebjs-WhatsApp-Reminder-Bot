@@ -8,5 +8,14 @@
     "start": "node server.js"
   },
   "author": "azharkoivila",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "agenda": "^5.0.0",
+    "assemblyai": "^4.13.4",
+    "chrono-node": "^2.8.3",
+    "dotenv": "^17.0.1",
+    "luxon": "^3.6.1",
+    "qrcode-terminal": "^0.12.0",
+    "whatsapp-web.js": "^1.31.0"
+  }
 }
