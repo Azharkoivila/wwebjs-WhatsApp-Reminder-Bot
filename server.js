@@ -6,7 +6,6 @@ const defineAgenda = require('./agenda/agenda-define.js');
 (async () => {
     try {
         await startAgenda();
-        console.log('Agenda started successfully.');
         await defineAgenda()
         await client.initialize();
     } catch (error) {
