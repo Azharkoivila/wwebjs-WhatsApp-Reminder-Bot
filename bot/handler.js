@@ -33,10 +33,18 @@ For more help, please refer to the documentation or contact support.
 
 client.on('message', async msg => {
     const msgBody = msg.body.toLowerCase();
-    //ping
+
+    // ping
     if (msgBody == '!ping') {
         console.log(msg.id.remote)
         msg.reply('pong');
+        return;
+    }
+
+    // help/instructions
+    if (msgBody === '!help' || msgBody === 'help' || msgBody === 'instructions') {
+        msg.reply(instructionMessage);
+        return;
     }
 
     // cancel
@@ -46,6 +54,7 @@ client.on('message', async msg => {
         } catch (error) {
             console.error("Failed to cancel Reminder:", error);
         }
+        return;
     }
 
 
@@ -57,12 +66,12 @@ client.on('message', async msg => {
         } catch (error) {
             console.error('Failed to add New Reminder', error);
         }
-
+        return;
     }
     //update reminder
     if (msgBody.startsWith('update') || msgBody.startsWith('edit')) {
         msg.reply('Please delete the reminder first and then create a new one with the updated details.');
-       
+        return;
     }
     //show reminders
     if (msgBody.startsWith('show') || msgBody.startsWith('list')) {
@@ -72,6 +81,7 @@ client.on('message', async msg => {
         } catch (error) {
             console.error('Failed to Show Reminder', error);
         }
+        return;
     }
     //transcribe voice message
     if (msg.hasMedia) {
@@ -88,10 +98,12 @@ client.on('message', async msg => {
             } catch (error) {
                 console.error('Failed to transcribe audio:', error);
             }
-         
+            return;
         }
     }
-    msg.reply(instructionMessage);    
+
+    // Any other message
+    msg.reply('Hi! Send *!help* for instructions on how to use the Reminder Bot.');
 });
 
 
