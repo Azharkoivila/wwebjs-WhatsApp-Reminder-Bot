@@ -8,8 +8,8 @@ const Transcriptior = require('../helpers/util/assemblyAi.js');
 
 
 // Instruction message
-const instructionMessage = 
-`🤖 *WhatsApp Reminder Bot Instructions*
+const instructionMessage =
+    `🤖 *WhatsApp Reminder Bot Instructions*
 Hello! I'm your WhatsApp Reminder Bot, here to help you manage your reminders easily.
 Available Commands:
 1. \`!ping\` - Check if the bot is online.
@@ -30,6 +30,9 @@ Available Commands:
 For more help, please refer to the documentation or contact support.
 `;
 
+const allowedUsers = [
+    "919746707326@c.us"// Replace with actual WhatsApp numbers of allowed users
+]
 
 client.on('message', async msg => {
     const msgBody = msg.body.toLowerCase();
@@ -49,6 +52,10 @@ client.on('message', async msg => {
 
     // cancel
     if (msgBody.startsWith('cancel') || msgBody.startsWith('delete')) {
+        if (!allowedUsers.includes(msg.id.remote)) {
+            msg.reply('🚫 You are *unauthenticated* to perform this action.');
+            return;
+        }
         try {
             await cancelReminder(msg);
         } catch (error) {
@@ -56,13 +63,15 @@ client.on('message', async msg => {
         }
         return;
     }
-
-
     //create  reminder
     if (msgBody.includes('remind me')) {
+        if (!allowedUsers.includes(msg.id.remote)) {
+            msg.reply('🚫 You are *unauthenticated* to perform this action.');
+            return;
+        }
         try {
 
-            await newReminder(msg,msgBody);
+            await newReminder(msg, msgBody);
         } catch (error) {
             console.error('Failed to add New Reminder', error);
         }
@@ -70,11 +79,19 @@ client.on('message', async msg => {
     }
     //update reminder
     if (msgBody.startsWith('update') || msgBody.startsWith('edit')) {
+        if (!allowedUsers.includes(msg.id.remote)) {
+            msg.reply('🚫 You are *unauthenticated* to perform this action.');
+            return;
+        }
         msg.reply('Please delete the reminder first and then create a new one with the updated details.');
         return;
     }
     //show reminders
     if (msgBody.startsWith('show') || msgBody.startsWith('list')) {
+        if (!allowedUsers.includes(msg.id.remote)) {
+            msg.reply('🚫 You are *unauthenticated* to perform this action.');
+            return;
+        }
         try {
 
             await showReminders(msg);
@@ -85,6 +102,10 @@ client.on('message', async msg => {
     }
     //transcribe voice message
     if (msg.hasMedia) {
+        if (!allowedUsers.includes(msg.id.remote)) {
+            msg.reply('🚫 You are *unauthenticated* to perform this action.');
+            return;
+        }
         const media = await msg.downloadMedia();
 
         if (media.mimetype.startsWith('audio')) {
