@@ -1,5 +1,5 @@
-const {agenda}=require('./agenda.js');
-const {sendReminderMessage} = require('../bot/handler.js');
+const { agenda } = require('./agenda.js');
+const { sendReminderMessage } = require('../bot/handler.js');
 
 async function defineAgenda() {
 
@@ -9,6 +9,19 @@ async function defineAgenda() {
         } catch (error) {
             console.error('Error sending reminder message:', error);
         }
+    });
+    agenda.define('cleanup completed jobs', async (job) => {
+        try {
+            const result = await agenda._collection.deleteMany({
+                lastFinishedAt: { $exists: true },
+                failedAt: { $exists: false }
+            });
+            console.log(`🧹 Cleanup complete. Removed ${result.deletedCount} finished jobs.`);
+
+        } catch (error) {
+            console.error('Error cleaning up completed jobs:', error);
+        }
+
     });
 }
 
