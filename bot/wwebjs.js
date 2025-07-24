@@ -1,5 +1,7 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
-var qrcode = require('qrcode-terminal');
+var qrCode = require('qrcode-terminal');
+const telegraf = require('../telegraf/telegraf.js');
+const telegrafQr = require('qrcode');
 
 const client = new Client({
     puppeteer: {
@@ -8,16 +10,26 @@ const client = new Client({
     authStrategy: new LocalAuth({ clientId: "my-whatsapp-session" })
 });
 
-client.on('qr', (qr) => {
-    // Generate and scan this code with your phone to log in
-    // The QR code will be printed in the terminal
-    console.log('QR RECEIVED', qr);
-    qrcode.generate(qr, { small: true });
+client.on('qr', async (qr) => {
+    try {
+        telegraf.telegram.sendMessage(process.env.TELEGRAM_CHAT_ID, 'QR Code received, scan Now...');
+        const qrCodeImage = await telegrafQr.toBuffer(qr);
+        telegraf.telegram.sendPhoto(process.env.TELEGRAM_CHAT_ID, { source: qrCodeImage });
+        qrCode.generate(qr, { small: true });
+    } catch (error) {
+        console.error(error);
+    }
 });
 
 
 client.on('ready', () => {
+    telegraf.telegram.sendMessage(process.env.TELEGRAM_CHAT_ID, 'wwebjs-Client is ready!!');
     console.log('Client is ready!');
 });
 
-module.exports=client
+client.on('authenticated', () => {
+    telegraf.telegram.sendMessage(process.env.TELEGRAM_CHAT_ID, 'wwebjs-Client is authenticated!!');
+    console.log('Client is authenticated!');
+});
+
+module.exports = client
