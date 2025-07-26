@@ -1,43 +1,98 @@
-const { Telegraf }=require( 'telegraf')
-// const { message } = require('telegraf/filters')
-// const qr = require('qrcode');
-
+const { Telegraf } = require('telegraf');
+const { getSystemInfo } = require('./helper/tHelper.js');
+const { exec } = require('child_process');
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
+const chatId = process.env.TELEGRAM_CHAT_ID;
 
-// bot.start(async(ctx) => {
-//     try {
-//     const qrCodeImage = await qr.toBuffer("hello world");
-//     await ctx.replyWithPhoto({ source: qrCodeImage });
-//   } catch (error) {
-//     console.error(error);
-//     ctx.reply('Failed to generate QR code.');
-//   }
-// })
+bot.command('sysInfo', async (ctx) => {
+    if (chatId != ctx.chat.id) {
+        ctx.reply('You are not authorized to use this command.');
+        return;
+    }
+    ctx.reply('Fetching system information...');
+    try {
+        const systemInfo = await getSystemInfo();
+        ctx.reply(JSON.stringify(systemInfo, null, 2));
+    } catch (error) {
+        console.error('Error fetching system information:', error);
+        ctx.reply('Failed to fetch system information.');
+    }
 
-// bot.on(message('text'), async(ctx) => {
-//     try {
-//     // const qrCodeImage = await qr.toBuffer(ctx.message.text);
-//     // await ctx.replyWithPhoto({ source: qrCodeImage });
-//     const chatId = ctx.chat.id;
-//   const username = ctx.from.username;
-//     console.log(chatId, username);
-//   } catch (error) {
-//     console.error(error);
-//     ctx.reply('Failed to generate QR code.');
-//   }
-// })
+});
 
-module.exports = bot;
+bot.command('pm2Status', async (ctx) => {
+    console.log(ctx.chat.id);
+    if (chatId != ctx.chat.id) {
+        ctx.reply('You are not authorized to use this command.');
+        return;
+    }
+    const { exec } = require('child_process');
 
-// Enable graceful stop
-// process.once('SIGINT', () => bot.stop('SIGINT'))
-// process.once('SIGTERM', () => bot.stop('SIGTERM'))
+    exec('pm2 jlist', (err, stdout, stderr) => {
+        if (err) {
+            console.error('Error fetching PM2 status:', err);
+            ctx.reply('Failed to fetch PM2 status.');
+            return;
+        }
+        ctx.reply(`PM2 Status:\n${stdout}`);
+    });
 
-// process.on('SIGINT', () => {
-//   console.log('Stopping bot gracefully...');
-//   bot.stop('SIGINT');
-// });
-// process.on('SIGTERM', () => {
-//   console.log('Stopping bot gracefully...');
-//   bot.stop('SIGTERM');
-// });
+})
+
+bot.command('ls', async (ctx) => {
+    if (process.env.TELEGRAM_CHAT_ID != ctx.chat.id) {
+        ctx.reply('You are not authorized to use this command.');
+        return;
+    }
+    exec('find . -mindepth 1 -maxdepth 1', (err, stdout, stderr) => {
+        if (err) {
+            console.error('Error listing Directory:', err);
+            ctx.reply('Failed to list Directory.');
+            return;
+        }
+        ctx.reply(`Directory contents:\n${stdout}`);
+    });
+});
+
+function registerWaClintHandlers(client) {
+    bot.command('deleteCache', async (ctx) => {
+        if (chatId != ctx.chat.id) {
+            ctx.reply('You are not authorized to use this command.');
+            return;
+        }
+        try {
+            await client.logout();
+            const { exec } = require('child_process');
+            exec('rm -rf .wwebjs_auth/ .wwebjs_cache/', (err, stdout, stderr) => {
+                if (err) {
+                    return;
+                }
+                ctx.reply('Cache deleted successfully.');
+            });
+        } catch (error) {
+            console.error(error);
+            return;
+        } finally {
+            client.initialize();
+        }
+    });
+
+}
+
+
+async function startTelegramBot() {
+    try {
+        bot.launch();
+        console.log("✅ Telegram bot launched.");
+
+    } catch (error) {
+        console.error("❌ Error launching Telegram bot:", error);
+    }
+}
+
+
+module.exports = {
+    bot,
+    registerWaClintHandlers,
+    startTelegramBot
+};
