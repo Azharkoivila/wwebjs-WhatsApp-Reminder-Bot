@@ -3,6 +3,7 @@ const { PassThrough } = require('stream');
 const cancelReminder = require('../helpers/wwebjs-functions/cancel-reminder.js');
 const newReminder = require('../helpers/wwebjs-functions/new-reminder.js');
 const showReminders = require('../helpers/wwebjs-functions/show-reminders.js');
+const scheduleRepeatCron = require('../helpers/wwebjs-functions/agendaCron.js');
 const Transcriptior = require('../helpers/util/assemblyAi.js');
 
 
@@ -17,7 +18,7 @@ Available Commands:
 3. \`Cancel [Reminder name]\` - Cancel an existing reminder.
 4. \`Show reminders\` - List all your scheduled reminders.
 5. \`Update [Reminder name] on [date] at [time] to [message]\` - Update an existing reminder.(Not available Now. Currently, Working on it)
-6. \`Voice Command\` - Send an audio message to transcribe it into text and create a reminder.[Currently, only Reminder Creation is supported]
+6. \`Voice Command\` - Send an audio message to transcribe it into text and create a reminder.[Currently, only Reminder Creation is supported] Note:The audio should be in English and use AssemblyAI for transcription. may not work properly.
 
 *Features:*
 - Schedule, cancel, and list reminders.
@@ -25,7 +26,7 @@ Available Commands:
 - All times are in IST (Asia/Calcutta).
 
 *Developer:* Azhar Koivila
-*GitHub:* https://github.com/azharkoivila
+*GitHub:* https://azharkoivila.tedomum.org/
 
 For more help, please refer to the documentation or contact support.
 `;
@@ -45,7 +46,7 @@ client.on('message', async msg => {
     }
 
     // help/instructions
-    if (msgBody === '!help' || msgBody === 'help' || msgBody === 'instructions') {
+    if (msgBody === 'help' || msgBody === 'hai' || msgBody === 'hi' || msgBody === 'hello' || msgBody === 'start') {
         msg.reply(instructionMessage);
         return;
     }
@@ -67,6 +68,15 @@ client.on('message', async msg => {
     if (msgBody.includes('remind me')) {
         if (!allowedUsers.includes(msg.id.remote)) {
             msg.reply('🚫 You are *unauthenticated* to perform this action.');
+            return;
+        }
+        if(msgBody.includes('every')) {
+            try {
+                const result = await scheduleRepeatCron(msgBody, msg.id.remote);
+                msg.reply(result);
+            } catch (error) {
+                console.error("Failed to schedule repeating reminder:", error);
+            }
             return;
         }
         try {
@@ -114,7 +124,12 @@ client.on('message', async msg => {
             stream.end(audioBuffer);
             try {
                 const text = await Transcriptior(stream);
-                //console.log('Transcribed Text:', text);
+                if (text.includes("every")) {
+                    console.log(text);
+                    const result = await scheduleRepeatCron(text, msg.id.remote);
+                    msg.reply(result);
+                    return;
+                }
                 await newReminder(msg, text);
             } catch (error) {
                 console.error('Failed to transcribe audio:', error);
@@ -124,7 +139,7 @@ client.on('message', async msg => {
     }
 
     // Any other message
-    msg.reply('Hi! Send *!help* for instructions on how to use the Reminder Bot.');
+    msg.reply('Hi! Send *help* for instructions on how to use the Reminder Bot.');
 });
 
 
