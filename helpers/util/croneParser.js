@@ -5,6 +5,11 @@ const dayMap = {
   thursday: 4, friday: 5, saturday: 6
 };
 
+const wordToNumber = {
+  one: 1, two: 2, three: 3, four: 4, five: 5,
+  six: 6, seven: 7, eight: 8, nine: 9, ten: 10
+};
+
 function parseScheduleToCron(input) {
   const lower = input.toLowerCase();
   const date = chrono.parseDate(input);
@@ -13,16 +18,42 @@ function parseScheduleToCron(input) {
 
   let cron = null;
 
+  // Match numeric or word-based numbers
+  const getNumber = (text) => {
+    const num = parseInt(text);
+    if (!isNaN(num)) return num;
+    return wordToNumber[text] || null;
+  };
+
   if (/every weekday/.test(lower)) cron = `${minutes} ${hours} * * 1-5`;
   else if (/every weekend/.test(lower)) cron = `${minutes} ${hours} * * 6,0`;
   else {
-    let match = lower.match(/every (\d+)\s*minutes?/);
-    if (match) cron = `*/${match[1]} * * * *`;
+    let match;
 
-    match = lower.match(/every (\d+)\s*hours?/);
-    if (!cron && match) cron = `0 */${match[1]} * * *`;
+    // every X minutes
+    match = lower.match(/every (\w+)\s*minutes?/);
+    if (match) {
+      const n = getNumber(match[1]);
+      if (n !== null) cron = `*/${n} * * * *`;
+    }
 
-    if (!cron && (/every day/.test(lower) || /daily/.test(lower))) cron = `${minutes} ${hours} * * *`;
+    // every X hours
+    match = lower.match(/every (\w+)\s*hours?/);
+    if (!cron && match) {
+      const n = getNumber(match[1]);
+      if (n !== null) cron = `0 */${n} * * *`;
+    }
+
+    // every X days
+    match = lower.match(/every (\w+)\s*days?/);
+    if (!cron && match) {
+      const n = getNumber(match[1]);
+      if (n !== null) cron = `${minutes} ${hours} */${n} * *`;
+    }
+
+    if (!cron && (/every day/.test(lower) || /daily/.test(lower))) {
+      cron = `${minutes} ${hours} * * *`;
+    }
 
     match = lower.match(/every ((?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)(?:,?\s*(?:and)?\s*(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday))*)/);
     if (!cron && match) {
@@ -57,9 +88,13 @@ function parseScheduleToCron(input) {
       cron = `${minutes} ${hours} ${days} * *`;
     }
 
-    if (!cron && /every (1st|first) of the month/.test(lower)) cron = `${minutes} ${hours} 1 * *`;
+    if (!cron && /every (1st|first) of the month/.test(lower)) {
+      cron = `${minutes} ${hours} 1 * *`;
+    }
 
-    if (!cron && /every last day of the month/.test(lower)) cron = `${minutes} ${hours} L * *`;
+    if (!cron && /every last day of the month/.test(lower)) {
+      cron = `${minutes} ${hours} L * *`;
+    }
 
     match = lower.match(/every (\d)(?:st|nd|rd|th)? (\w+) at/i);
     if (!cron && match && dayMap[match[2].toLowerCase()] !== undefined) {
@@ -67,7 +102,6 @@ function parseScheduleToCron(input) {
     }
   }
 
-  // Extract message (e.g., “to call mom”)
   let message = "";
   const messageMatch = input.match(/(?:at\s+\d{1,2}(:\d{2})?)\s+(.*)/i) ||
                        input.match(/(?:every.*)\s+(to|for|about)\s+(.*)/i);
