@@ -1,12 +1,13 @@
 const { agenda } = require('../../agenda/agenda.js');
 const extractReminder = require('../util/reminer-parser.js');
 const chrono = require('chrono-node');
+const {msgScheduledText,msgInvalidInput,msgvalidfutureDate} = require('../templates/msgtemplates.js');
 
 async function newReminder(msg, text) {
 
     const reminder = await extractReminder(text);
     if (reminder.date === undefined || reminder.message === undefined) {
-        msg.reply('❗ Invalid input format. Please use "Remind me on [date] at [time] to [message]"');
+        msg.reply(msgInvalidInput);
     } else {
         // Check if the reminder already exists
         // const existingJob = await agenda.findOne({
@@ -20,7 +21,7 @@ async function newReminder(msg, text) {
         // console.log(reminder.date, reminder.message, msg.id.remote);
         let DateTime = chrono.parseDate(reminder.date, new Date(), { forwardDate: true });
         if (DateTime <= new Date()) {
-            msg.reply('❗Please provide a future date and Time\n.OR Provide AM/PM format for the time.');
+            msg.reply(msgvalidfutureDate);
         } else {
             let result = await NewReminder(reminder.date, reminder.message, msg.id.remote);
 
@@ -31,13 +32,13 @@ async function newReminder(msg, text) {
                 timeStyle: 'short',
             });
 
-            const confirmationMsg =
-                `✅ *New Reminder Scheduled!*
+            // const confirmationMsg =
+            //     `✅ *New Reminder Scheduled!*
 
-                📝 *Reminder:* ${result.attrs.data.message}
-                ⏰ *When:* ${formattedTime}
-                📍 *Status:* Scheduled ⏳`;
-            msg.reply(confirmationMsg);
+            //     📝 *Reminder:* ${result.attrs.data.message}
+            //     ⏰ *When:* ${formattedTime}
+            //     📍 *Status:* Scheduled ⏳`;
+            msg.reply(msgScheduledText(formattedTime, result.attrs.data.message));
 
         }
     }

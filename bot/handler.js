@@ -5,35 +5,9 @@ const newReminder = require('../helpers/wwebjs-functions/new-reminder.js');
 const showReminders = require('../helpers/wwebjs-functions/show-reminders.js');
 const scheduleRepeatCron = require('../helpers/wwebjs-functions/agendaCron.js');
 const Transcriptior = require('../helpers/util/assemblyAi.js');
+const { instructionMessage,msgNotauthenticated,otherMsg,msgUpdate,reminderText} = require('../helpers/templates/msgtemplates.js');
+const {getUsers} = require('./users.js');
 
-
-
-// Instruction message
-const instructionMessage =
-    `🤖 *WhatsApp Reminder Bot Instructions*
-Hello! I'm your WhatsApp Reminder Bot, here to help you manage your reminders easily.
-Available Commands:
-1. \`!ping\` - Check if the bot is online.
-2. \`Remind me on [date] at [time] to [message]\` - Schedule a new reminder.
-3. \`Cancel [Reminder name]\` - Cancel an existing reminder.
-4. \`Show reminders\` - List all your scheduled reminders.
-5. \`Update [Reminder name] on [date] at [time] to [message]\` - Update an existing reminder.(Not available Now. Currently, Working on it)
-6. \`Voice Command\` - Send an audio message to transcribe it into text and create a reminder.[Currently, only Reminder Creation is supported] Note:The audio should be in English and use AssemblyAI for transcription. may not work properly.
-
-*Features:*
-- Schedule, cancel, and list reminders.
-- Transcribe audio messages into reminders.
-- All times are in IST (Asia/Calcutta).
-
-*Developer:* Azhar Koivila
-*GitHub:* https://azharkoivila.tedomum.org/
-
-For more help, please refer to the documentation or contact support.
-`;
-
-const allowedUsers = [
-    "919746707326@c.us"// Replace with actual WhatsApp numbers of allowed users
-]
 
 client.on('message', async msg => {
     const msgBody = msg.body.toLowerCase();
@@ -47,14 +21,19 @@ client.on('message', async msg => {
 
     // help/instructions
     if (msgBody === 'help' || msgBody === 'hai' || msgBody === 'hi' || msgBody === 'hello' || msgBody === 'start') {
-        msg.reply(instructionMessage);
+        const chat=await msg.getChat();
+        chat.sendStateTyping();
+          setTimeout(async () => {
+            await msg.reply(instructionMessage);
+            await chat.clearState();
+        }, 1000);
         return;
     }
 
     // cancel
     if (msgBody.startsWith('cancel') || msgBody.startsWith('delete')) {
-        if (!allowedUsers.includes(msg.id.remote)) {
-            msg.reply('🚫 You are *unauthenticated* to perform this action.');
+        if (!getUsers().includes(msg.id.remote)) {
+            msg.reply(msgNotauthenticated);
             return;
         }
         try {
@@ -66,8 +45,8 @@ client.on('message', async msg => {
     }
     //create  reminder
     if (msgBody.includes('remind me')) {
-        if (!allowedUsers.includes(msg.id.remote)) {
-            msg.reply('🚫 You are *unauthenticated* to perform this action.');
+        if (!getUsers().includes(msg.id.remote)) {
+            msg.reply(msgNotauthenticated);
             return;
         }
         if(msgBody.includes('every')) {
@@ -89,17 +68,17 @@ client.on('message', async msg => {
     }
     //update reminder
     if (msgBody.startsWith('update') || msgBody.startsWith('edit')) {
-        if (!allowedUsers.includes(msg.id.remote)) {
-            msg.reply('🚫 You are *unauthenticated* to perform this action.');
+        if (!getUsers().includes(msg.id.remote)) {
+            msg.reply(msgNotauthenticated);
             return;
         }
-        msg.reply('Please delete the reminder first and then create a new one with the updated details.');
+        msg.reply(msgUpdate);
         return;
     }
     //show reminders
     if (msgBody.startsWith('show') || msgBody.startsWith('list')) {
-        if (!allowedUsers.includes(msg.id.remote)) {
-            msg.reply('🚫 You are *unauthenticated* to perform this action.');
+        if (!getUsers().includes(msg.id.remote)) {
+            msg.reply(msgNotauthenticated);
             return;
         }
         try {
@@ -112,25 +91,34 @@ client.on('message', async msg => {
     }
     //transcribe voice message
     if (msg.hasMedia) {
-        if (!allowedUsers.includes(msg.id.remote)) {
-            msg.reply('🚫 You are *unauthenticated* to perform this action.');
+        if (!getUsers().includes(msg.id.remote)) {
+            msg.reply(msgNotauthenticated);
             return;
         }
+        const chat = await msg.getChat();
+        chat.sendStateTyping();
         const media = await msg.downloadMedia();
 
+        
         if (media.mimetype.startsWith('audio')) {
-            const audioBuffer = Buffer.from(media.data, 'base64');
-            const stream = new PassThrough();
-            stream.end(audioBuffer);
             try {
+                const audioBuffer = await Buffer.from(media.data, 'base64');
+                const stream = new PassThrough();
+                stream.end(audioBuffer);
                 const text = await Transcriptior(stream);
                 if (text.includes("every")) {
                     console.log(text);
                     const result = await scheduleRepeatCron(text, msg.id.remote);
-                    msg.reply(result);
+                    setTimeout(async () => {
+                        await msg.reply(result);
+                        await chat.clearState();
+                    }, 1000);
                     return;
                 }
-                await newReminder(msg, text);
+                setTimeout(async () => {
+                    await newReminder(msg, text);
+                    await chat.clearState();
+                }, 1000);
             } catch (error) {
                 console.error('Failed to transcribe audio:', error);
             }
@@ -139,7 +127,7 @@ client.on('message', async msg => {
     }
 
     // Any other message
-    msg.reply('Hi! Send *help* for instructions on how to use the Reminder Bot.');
+    msg.reply(otherMsg);
 });
 
 
@@ -155,15 +143,7 @@ async function sendReminderMessage(job) {
             timeStyle: 'short',
         });
 
-        const reminderText =
-            `🛎️ *Reminder Alert!*
-
-            📝 *Task:* ${message}
-            🕒 *Time:* ${timeString}
-            🚀 *Action:* Start Now`;
-
-        await client.sendMessage(user, reminderText);
-        console.log('Message sent successfully!');
+        await client.sendMessage(user, reminderText(message, timeString));
     } catch (err) {
         console.error('Failed to send message:', err);
     }

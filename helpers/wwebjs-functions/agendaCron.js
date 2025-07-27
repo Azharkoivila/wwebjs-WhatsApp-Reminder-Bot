@@ -1,10 +1,11 @@
 const { agenda } = require('../../agenda/agenda.js');
 const croneParser = require('../util/croneParser.js');
+const {msgRepeatText,reminderFormat} = require('../templates/msgtemplates.js');
 async function scheduleRepeatCron(schedule, user) {
     const { cron, message } = await croneParser(schedule);
     if (!cron || !message) {
         console.error("Invalid schedule format");
-        return `❌ Invalid schedule format. Please use a valid reminder format. Example: "Remind me every Monday at 10:00 to call mom"`;
+        return reminderFormat;
 
     }
     try {
@@ -19,13 +20,14 @@ async function scheduleRepeatCron(schedule, user) {
                 timeStyle: 'short',
             });
 
-            const confirmationMsg =
-                `✅ *New Repeating Reminder Scheduled!*
+            // const confirmationMsg =
+            //     `✅ *New Repeating Reminder Scheduled!*
 
-                📝 *Reminder:* ${job.attrs.data.message}
-                ⏰ *When:* ${formattedTime}
-                📍 *Status:* Scheduled ⏳`;
-        return confirmationMsg;
+            //     📝 *Reminder:* ${job.attrs.data.message}
+            //     ⏰ *When:* ${formattedTime}
+            //     📍 *Status:* Scheduled ⏳`;
+
+        return msgRepeatText(message, formattedTime);
     } catch (error) {
         console.error("Error scheduling repeating reminder:", error);
     }

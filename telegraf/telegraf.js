@@ -1,6 +1,7 @@
 const { Telegraf } = require('telegraf');
 const { getSystemInfo } = require('./helper/tHelper.js');
 const { exec } = require('child_process');
+const{addUser,getUsers,removeUser} = require('../bot/users.js');
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 const chatId = process.env.TELEGRAM_CHAT_ID;
 
@@ -20,24 +21,49 @@ bot.command('sysInfo', async (ctx) => {
 
 });
 
-bot.command('pm2Status', async (ctx) => {
-    console.log(ctx.chat.id);
+bot.command('addUser', async (ctx) => {
     if (chatId != ctx.chat.id) {
         ctx.reply('You are not authorized to use this command.');
         return;
     }
-    const { exec } = require('child_process');
+  const userId = `${ctx.message.text.split(' ').slice(1).join(' ').trim()}@c.us`;
+  if (!userId || userId.length === 0) {
+    ctx.reply('You need to provide a user ID to add.');
+  } else {
+    ctx.reply(`You said: ${userId}`);
+    addUser(userId);
+    ctx.reply(`User ${userId} added successfully.`);
+  }
+});
 
-    exec('pm2 jlist', (err, stdout, stderr) => {
-        if (err) {
-            console.error('Error fetching PM2 status:', err);
-            ctx.reply('Failed to fetch PM2 status.');
-            return;
-        }
-        ctx.reply(`PM2 Status:\n${stdout}`);
-    });
+bot.command('showUsers', async (ctx) => {
+    if (chatId != ctx.chat.id) {
+        ctx.reply('You are not authorized to use this command.');
+        return;
+    }
+    const users = getUsers();
+    if (users.length === 0) {
+        ctx.reply('No users found.');
+    } else {
+        ctx.reply(`Registered users:\n${users.join('\n')}`);
+    }
+});
 
-})
+bot.command('removeUser', async (ctx) => {
+    if (chatId != ctx.chat.id) {
+        ctx.reply('You are not authorized to use this command.');
+        return;
+    }
+    const userId = `${ctx.message.text.split(' ').slice(1).join(' ').trim()}@c.us`;
+    if (!userId || userId.length === 0) {
+        ctx.reply('You need to provide a user ID to remove.');
+    } else {
+        removeUser(userId);
+        ctx.reply(`User ${userId} removed successfully.`);
+    }
+});
+
+ 
 
 bot.command('ls', async (ctx) => {
     if (process.env.TELEGRAM_CHAT_ID != ctx.chat.id) {

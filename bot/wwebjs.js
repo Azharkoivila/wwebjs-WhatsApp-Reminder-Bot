@@ -1,10 +1,14 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 var qrCode = require('qrcode-terminal');
-const {bot} = require('../telegraf/telegraf.js');
+const { bot } = require('../telegraf/telegraf.js');
 const telegrafQr = require('qrcode');
 const client = new Client({
     puppeteer: {
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        args: ['--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage', // important for low-RAM
+            '--disable-gpu',
+            '--disable-features=VizDisplayCompositor',]
     },
     authStrategy: new LocalAuth({ clientId: "my-whatsapp-session" })
 });
