@@ -5,7 +5,7 @@ const{addUser,getUsers,removeUser} = require('../bot/users.js');
 const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
 const chatId = process.env.TELEGRAM_CHAT_ID;
 
-bot.command('sysInfo', async (ctx) => {
+bot.command('sysinfo', async (ctx) => {
     if (chatId != ctx.chat.id) {
         ctx.reply('You are not authorized to use this command.');
         return;
@@ -21,7 +21,7 @@ bot.command('sysInfo', async (ctx) => {
 
 });
 
-bot.command('addUser', async (ctx) => {
+bot.command('adduser', async (ctx) => {
     if (chatId != ctx.chat.id) {
         ctx.reply('You are not authorized to use this command.');
         return;
@@ -36,7 +36,7 @@ bot.command('addUser', async (ctx) => {
   }
 });
 
-bot.command('showUsers', async (ctx) => {
+bot.command('showusers', async (ctx) => {
     if (chatId != ctx.chat.id) {
         ctx.reply('You are not authorized to use this command.');
         return;
@@ -49,7 +49,7 @@ bot.command('showUsers', async (ctx) => {
     }
 });
 
-bot.command('removeUser', async (ctx) => {
+bot.command('removeuser', async (ctx) => {
     if (chatId != ctx.chat.id) {
         ctx.reply('You are not authorized to use this command.');
         return;
