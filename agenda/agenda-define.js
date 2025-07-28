@@ -14,7 +14,9 @@ async function defineAgenda() {
         try {
             const result = await agenda._collection.deleteMany({
                 lastFinishedAt: { $exists: true },
-                failedAt: { $exists: false }
+                repeatInterval: { $exists: false },
+                failedAt: { $exists: false },
+                nextRunAt: null
             });
             console.log(`🧹 Cleanup complete. Removed ${result.deletedCount} finished jobs.`);
 
