@@ -11,12 +11,12 @@ const {getUsers} = require('./users.js');
 
 client.on('message', async msg => {
     const chat=await msg.getChat();
+    await chat.sendStateTyping();
     const msgBody = msg.body.toLowerCase();
 
     // ping
     if (msgBody == '!ping') {
         console.log(msg.id.remote);
-        await chat.sendStateTyping();
         setTimeout(async () => {
             await msg.reply('pong');
             await chat.clearState();
@@ -26,7 +26,6 @@ client.on('message', async msg => {
 
     // help/instructions
     if (msgBody === 'help' || msgBody === 'hai' || msgBody === 'hi' || msgBody === 'hello' || msgBody === 'start') {
-        await chat.sendStateTyping();
           setTimeout(async () => {
             await msg.reply(instructionMessage);
             await chat.clearState();
@@ -36,7 +35,6 @@ client.on('message', async msg => {
 
     // cancel
     if (msgBody.startsWith('cancel') || msgBody.startsWith('delete')) {
-        await chat.sendStateTyping();
         if (!getUsers().includes(msg.id.remote)) {
             setTimeout(async () => {
                 await msg.reply(msgNotauthenticated);
@@ -56,7 +54,6 @@ client.on('message', async msg => {
     }
     //create  reminder
     if (msgBody.includes('remind me')) {
-        await chat.sendStateTyping();
         if (!getUsers().includes(msg.id.remote)) {
             setTimeout(async () => {
                 await msg.reply(msgNotauthenticated);
@@ -87,7 +84,6 @@ client.on('message', async msg => {
     }
     //update reminder
     if (msgBody.startsWith('update') || msgBody.startsWith('edit')) {
-        await chat.sendStateTyping();
         if (!getUsers().includes(msg.id.remote)) {
             setTimeout(async () => {
                 await msg.reply(msgNotauthenticated);
@@ -103,7 +99,6 @@ client.on('message', async msg => {
     }
     //show reminders
     if (msgBody.startsWith('show') || msgBody.startsWith('list')) {
-        await chat.sendStateTyping();
         if (!getUsers().includes(msg.id.remote)) {
             setTimeout(async () => {
                 await msg.reply(msgNotauthenticated);
@@ -123,7 +118,6 @@ client.on('message', async msg => {
     }
     //transcribe voice message
     if (msg.hasMedia) {
-        chat.sendStateTyping();
         if (!getUsers().includes(msg.id.remote)) {
             setTimeout(async () => {
                 await msg.reply(msgNotauthenticated);
@@ -159,7 +153,10 @@ client.on('message', async msg => {
     }
 
     // Any other message
-    msg.reply(otherMsg);
+    setTimeout(async ()=>{
+        await msg.reply(otherMsg);
+        await chat.clearState();
+    },1000)
 });
 
 
