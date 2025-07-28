@@ -10,19 +10,23 @@ const {getUsers} = require('./users.js');
 
 
 client.on('message', async msg => {
+    const chat=await msg.getChat();
     const msgBody = msg.body.toLowerCase();
 
     // ping
     if (msgBody == '!ping') {
-        console.log(msg.id.remote)
-        msg.reply('pong');
+        console.log(msg.id.remote);
+        await chat.sendStateTyping();
+        setTimeout(async () => {
+            await msg.reply('pong');
+            await chat.clearState();
+        }, 1000);
         return;
     }
 
     // help/instructions
     if (msgBody === 'help' || msgBody === 'hai' || msgBody === 'hi' || msgBody === 'hello' || msgBody === 'start') {
-        const chat=await msg.getChat();
-        chat.sendStateTyping();
+        await chat.sendStateTyping();
           setTimeout(async () => {
             await msg.reply(instructionMessage);
             await chat.clearState();
@@ -32,12 +36,19 @@ client.on('message', async msg => {
 
     // cancel
     if (msgBody.startsWith('cancel') || msgBody.startsWith('delete')) {
+        await chat.sendStateTyping();
         if (!getUsers().includes(msg.id.remote)) {
-            msg.reply(msgNotauthenticated);
+            setTimeout(async () => {
+                await msg.reply(msgNotauthenticated);
+                await chat.clearState();
+            }, 1000);
             return;
         }
         try {
+            setTimeout(async () => {
             await cancelReminder(msg);
+            await chat.clearState();
+            }, 1000);
         } catch (error) {
             console.error("Failed to cancel Reminder:", error);
         }
@@ -45,22 +56,30 @@ client.on('message', async msg => {
     }
     //create  reminder
     if (msgBody.includes('remind me')) {
+        await chat.sendStateTyping();
         if (!getUsers().includes(msg.id.remote)) {
-            msg.reply(msgNotauthenticated);
+            setTimeout(async () => {
+                await msg.reply(msgNotauthenticated);
+                await chat.clearState();
+            }, 1000);
             return;
         }
         if(msgBody.includes('every')) {
             try {
-                const result = await scheduleRepeatCron(msgBody, msg.id.remote);
-                msg.reply(result);
+                setTimeout(async () => {
+                    const result = await scheduleRepeatCron(msgBody, msg.id.remote);
+                    msg.reply(result);
+                }, 1000);
             } catch (error) {
                 console.error("Failed to schedule repeating reminder:", error);
             }
             return;
         }
         try {
-
-            await newReminder(msg, msgBody);
+            setTimeout(async () => {
+                await newReminder(msg, msgBody);
+                await chat.clearState();
+            }, 1000);
         } catch (error) {
             console.error('Failed to add New Reminder', error);
         }
@@ -68,22 +87,35 @@ client.on('message', async msg => {
     }
     //update reminder
     if (msgBody.startsWith('update') || msgBody.startsWith('edit')) {
+        await chat.sendStateTyping();
         if (!getUsers().includes(msg.id.remote)) {
-            msg.reply(msgNotauthenticated);
+            setTimeout(async () => {
+                await msg.reply(msgNotauthenticated);
+                await chat.clearState();
+            }, 1000);
             return;
         }
-        msg.reply(msgUpdate);
+        setTimeout(async () => {
+            await msg.reply(msgUpdate);
+            await chat.clearState();
+        }, 1000);
         return;
     }
     //show reminders
     if (msgBody.startsWith('show') || msgBody.startsWith('list')) {
+        await chat.sendStateTyping();
         if (!getUsers().includes(msg.id.remote)) {
-            msg.reply(msgNotauthenticated);
+            setTimeout(async () => {
+                await msg.reply(msgNotauthenticated);
+                await chat.clearState();
+            }, 1000);
             return;
         }
         try {
-
-            await showReminders(msg);
+            setTimeout(async () => {
+                await showReminders(msg);
+                await chat.clearState();
+            }, 1000);
         } catch (error) {
             console.error('Failed to Show Reminder', error);
         }
@@ -91,15 +123,15 @@ client.on('message', async msg => {
     }
     //transcribe voice message
     if (msg.hasMedia) {
+        chat.sendStateTyping();
         if (!getUsers().includes(msg.id.remote)) {
-            msg.reply(msgNotauthenticated);
+            setTimeout(async () => {
+                await msg.reply(msgNotauthenticated);
+                await chat.clearState();
+            }, 1000);
             return;
         }
-        const chat = await msg.getChat();
-        chat.sendStateTyping();
         const media = await msg.downloadMedia();
-
-        
         if (media.mimetype.startsWith('audio')) {
             try {
                 const audioBuffer = await Buffer.from(media.data, 'base64');
