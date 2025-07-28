@@ -50,10 +50,10 @@ function reminderText(message, timeString) {
 
 }
 function msgRepeatText(message, timeString) {
-    return `🛎️ *Repeating Reminder Alert!*
+    return `🛎️ *Repeating Reminder Scheduled!*
             📝 *Task:* ${message}
             🕒 *Time:* ${timeString}
-            🚀 *Action:* Start Now`;
+            📍 *Status:* Scheduled ⏳`;
 }
 
 function msgScheduledText(formattedTime, reminder) {
