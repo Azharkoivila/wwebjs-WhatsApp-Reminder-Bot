@@ -9,7 +9,7 @@ Available Commands:
 5. \`Update [Reminder name] on [date] at [time] to [message]\` - Update an existing reminder.(Not available Now. Currently, Working on it)
 6. \`Voice Command\` - Send an audio message to transcribe it into text and create a reminder.[Currently, only Reminder Creation is supported] Note:The audio should be in English and use AssemblyAI for transcription. may not work properly.
 Technical Stack Used:
-- Refer https://github.com/AzharKoivila/wwebjs-Reminder-bot.
+- Refer https://github.com/Azharkoivila/wwebjs-WhatsApp-Reminder-Bot.
 *Features:*
 - Schedule, cancel, and list reminders.
 - Transcribe audio messages into reminders.
@@ -64,13 +64,13 @@ function msgScheduledText(formattedTime, reminder) {
                 📍 *Status:* Scheduled ⏳`;
 }
 
-function showReminderText(index,reminder, dateOnly, timeOnly, job) {
+function showReminderText(index,reminder, dateOnly, timeOnly, type) {
     return `🔹 *Reminder #${index + 1}*\n` +
                 `📝 *Message:* ${reminder}\n` +
                 `📅 *Date:* ${dateOnly}\n` +
                 `⏰ *Time:* ${timeOnly}\n` +
                 `🔔 *Alert:* At the time of event\n` +
-                `📌 *Note:* ${job}\n` +
+                `📌 *Type:* ${type}\n` +
                 `📍 *Status:* Scheduled ⏳\n\n`;
 }
 

@@ -19,7 +19,7 @@ async function showReminders(msg) {
 
             const [dateOnly, timeOnly] = dateTime.split(', '); // Separate date and time
 
-            response += showReminderText(index, job.attrs.data.message, dateOnly, timeOnly, job.attrs.data.job);
+            response += showReminderText(index, job.attrs.data.message, dateOnly, timeOnly, isRepeat = job.attrs.repeatInterval ? 'Repeating' : 'One-time');
 
             // response += `🔹 *Reminder #${index + 1}*\n` +
             //     `📝 *Message:* ${job.attrs.data.message}\n` +
