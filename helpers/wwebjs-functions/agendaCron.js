@@ -1,5 +1,6 @@
 const { agenda } = require('../../agenda/agenda.js');
 const croneParser = require('../util/croneParser.js');
+const {ObjectId} = require('mongodb')
 const {msgRepeatText,reminderFormat} = require('../templates/msgtemplates.js');
 async function scheduleRepeatCron(schedule, user) {
     const { cron, message } = await croneParser(schedule);
@@ -11,9 +12,11 @@ async function scheduleRepeatCron(schedule, user) {
     try {
         await agenda.start();
         await agenda._ready;
-        const job = await agenda.every(cron, "Reminders", {
+        const job = agenda.create("Reminders", {
             message, user
         });
+        job.repeatEvery(cron);
+         await job.save();
           const formattedTime = job.attrs.nextRunAt.toLocaleString('en-IN', {
                 timeZone: 'Asia/Calcutta',
                 dateStyle: 'medium',
