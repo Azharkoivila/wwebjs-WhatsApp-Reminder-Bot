@@ -13,7 +13,6 @@ client.on('message', asyncHandler(async msg => {
     const chat = await msg.getChat();
     await chat.sendStateTyping();
     const msgBody = msg.body.toLowerCase();
-    const userId = msg.id.remote
 
     // ping
     if (msgBody == '!ping') {
@@ -101,4 +100,4 @@ async function sendReminderMessage(job) {
 
 }
 
-module.exports = { client, sendReminderMessage, sendScheduledMsg };
+module.exports = { client, sendReminderMessage };
