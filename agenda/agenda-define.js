@@ -24,15 +24,6 @@ async function defineAgenda() {
             console.error('Error cleaning up completed jobs:', error);
         }
     });
-
-    agenda.define(process.env.SCHEDULE_MSG_AGENDA, async (job) => {
-        try {
-            
-        } catch (error) {
-            console.error('Error sending reminder message:', error);
-        }
-    });
-
 }
 
 module.exports = defineAgenda;
