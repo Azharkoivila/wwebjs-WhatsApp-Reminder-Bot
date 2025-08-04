@@ -1,7 +1,7 @@
 const { agenda } = require('../../agenda/agenda.js');
 const extractReminder = require('../util/reminer-parser.js');
 const chrono = require('chrono-node');
-const {msgScheduledText,msgInvalidInput,msgvalidfutureDate} = require('../templates/msgtemplates.js');
+const { msgScheduledText, msgInvalidInput, msgvalidfutureDate, timestamp } = require('../templates/msgtemplates.js');
 
 async function newReminder(msg, text) {
 
@@ -23,33 +23,21 @@ async function newReminder(msg, text) {
         if (DateTime <= new Date()) {
             msg.reply(msgvalidfutureDate);
         } else {
-            let result = await NewReminder(reminder.date, reminder.message, msg.id.remote);
-
-            // Format next run time in IST with better formatting
-            const formattedTime = result.attrs.nextRunAt.toLocaleString('en-IN', {
-                timeZone: 'Asia/Calcutta',
-                dateStyle: 'medium',
-                timeStyle: 'short',
-            });
-
-            // const confirmationMsg =
-            //     `✅ *New Reminder Scheduled!*
-
-            //     📝 *Reminder:* ${result.attrs.data.message}
-            //     ⏰ *When:* ${formattedTime}
-            //     📍 *Status:* Scheduled ⏳`;
+            let result = await createReminder(reminder.date, reminder.message, msg.id.remote);
+            const formattedTime = result.attrs.nextRunAt.toLocaleString('en-IN', timestamp);
             msg.reply(msgScheduledText(formattedTime, result.attrs.data.message));
 
         }
     }
 }
 
-async function NewReminder(time, message, user) {
+
+//creation of new Reminder
+async function createReminder(time, message, user) {
     try {
         await agenda.start();
         await agenda._ready;
-        const job = await agenda.schedule(time, 'Reminders', { message, user });
-        // console.log(`New reminder scheduled: ${job.attrs.name} at ${job.attrs.nextRunAt}`);
+        const job = await agenda.schedule(time, process.env.REMINDER_AGENDA, { message, user });
         return job;
     } catch (error) {
         console.error('Failed to schedule new reminder:', error.message);

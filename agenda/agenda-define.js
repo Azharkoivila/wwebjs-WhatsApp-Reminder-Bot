@@ -3,14 +3,14 @@ const { sendReminderMessage } = require('../bot/handler.js');
 
 async function defineAgenda() {
 
-    agenda.define("Reminders", async (job) => {
+    agenda.define(process.env.REMINDER_AGENDA, async (job) => {
         try {
             await sendReminderMessage(job);
         } catch (error) {
             console.error('Error sending reminder message:', error);
         }
     });
-    agenda.define('cleanup completed jobs', async (job) => {
+    agenda.define(process.env.CLEAN_UP_AGENDA, async (job) => {
         try {
             const result = await agenda._collection.deleteMany({
                 lastFinishedAt: { $exists: true },
@@ -23,8 +23,16 @@ async function defineAgenda() {
         } catch (error) {
             console.error('Error cleaning up completed jobs:', error);
         }
-
     });
+
+    agenda.define(process.env.SCHEDULE_MSG_AGENDA, async (job) => {
+        try {
+            
+        } catch (error) {
+            console.error('Error sending reminder message:', error);
+        }
+    });
+
 }
 
 module.exports = defineAgenda;

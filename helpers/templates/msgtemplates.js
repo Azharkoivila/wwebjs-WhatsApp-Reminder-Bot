@@ -21,6 +21,12 @@ Technical Stack Used:
 For more help, please refer to the documentation or contact support.
 `;
 
+
+const timestamp={
+            timeZone: 'Asia/Calcutta',
+            dateStyle: 'medium',
+            timeStyle: 'short',
+        }
 const msgNotauthenticated = `🚫 You are *unauthenticated* to perform this action. contact Developer.`;
 
 const otherMsg = 'Hi! Send *help* for instructions on how to use the Reminder Bot.';
@@ -40,6 +46,10 @@ const msgvalidReminderName = `❌ Please provide a valid reminder name.`;
 const msgInvalidInput = `❗ Invalid input format. Please use "Remind me on [date] at [time] to [message]"`;
 
 const msgvalidfutureDate = `❗Please provide a future date and Time\n.OR Provide AM/PM format for the time. e.g: Remind me on [date] at [time] to [message] `;
+
+const noactiveReminders='📭 No active reminders.';
+
+ let listRemindersView = '📋 *Your Scheduled Reminders:*\n\n';
 
 
 function reminderText(message, timeString) {
@@ -86,6 +96,9 @@ module.exports = {
     msgvalidReminderName,
     msgInvalidInput,
     msgvalidfutureDate,
+    timestamp,
+    noactiveReminders,
+    listRemindersView,
     reminderText,
     msgRepeatText,
     msgScheduledText,

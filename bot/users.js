@@ -2,8 +2,13 @@ const {client} = require('../bot/handler');
 const allowedUsers = ["919746707326@c.us"];
 
 async function addUser(user) {
-  await allowedUsers.push(user);
-  // await client.sendMessage(user, `You are Now Authenticated . You can now use the bot.`);
+  try {
+    await allowedUsers.push(user);
+    // await client.sendMessage(user, `You are Now Authenticated . You can now use the bot.`);
+    
+  } catch (error) {
+    console.log(error)
+  }
 }
 
 function getUsers() {

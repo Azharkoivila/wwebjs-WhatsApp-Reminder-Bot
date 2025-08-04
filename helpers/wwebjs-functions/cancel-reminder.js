@@ -1,6 +1,6 @@
 const getFileName = require('../util/regx-functions.js');
 const { agenda } = require('../../agenda/agenda.js');
-const{msgDelete,msgDeletefailed,msgNoreminderfound,msgvalidReminderName} = require('../templates/msgtemplates.js');
+const { msgDelete, msgDeletefailed, msgNoreminderfound, msgvalidReminderName } = require('../templates/msgtemplates.js');
 async function CancelReminder(msg) {
 
     const fileName = await getFileName(msg.body.toLowerCase());
