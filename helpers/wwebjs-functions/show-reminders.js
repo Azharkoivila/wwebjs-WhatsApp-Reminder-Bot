@@ -1,12 +1,12 @@
 const { agenda } = require('../../agenda/agenda.js');
-let {listRemindersView } = require('../templates/msgtemplates.js');
-const { showReminderText, timestamp,noactiveReminders } = require('../templates/msgtemplates.js');
+const { showReminderText, timestamp, noactiveReminders } = require('../templates/msgtemplates.js');
 
 async function showReminders(msg) {
     const jobs = (await agenda.jobs({ nextRunAt: { $gt: new Date() }, 'data.user': msg.id.remote })).sort((a, b) => a.attrs.nextRunAt - b.attrs.nextRunAt);
     if (jobs.length === 0) {
         msg.reply(noactiveReminders);
     } else {
+        let listRemindersView = '📋 *Your Scheduled Reminders:*\n\n';
         jobs.forEach((job, index) => {
             const runAt = job.attrs.nextRunAt;
 

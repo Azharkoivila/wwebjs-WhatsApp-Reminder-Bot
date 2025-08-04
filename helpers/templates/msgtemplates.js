@@ -49,8 +49,6 @@ const msgvalidfutureDate = `❗Please provide a future date and Time\n.OR Provid
 
 const noactiveReminders='📭 No active reminders.';
 
- let listRemindersView = '📋 *Your Scheduled Reminders:*\n\n';
-
 
 function reminderText(message, timeString) {
    return `🛎️ *Reminder Alert!*
@@ -98,7 +96,6 @@ module.exports = {
     msgvalidfutureDate,
     timestamp,
     noactiveReminders,
-    listRemindersView,
     reminderText,
     msgRepeatText,
     msgScheduledText,
