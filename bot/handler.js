@@ -5,7 +5,7 @@ const newReminder = require('../helpers/wwebjs-functions/new-reminder.js');
 const showReminders = require('../helpers/wwebjs-functions/show-reminders.js');
 const scheduleRepeatCron = require('../helpers/wwebjs-functions/agendaCron.js');
 const Transcriptior = require('../helpers/util/assemblyAi.js');
-const { asyncHandler} = require('../helpers/util/Handlers.js')
+const { asyncHandler} = require('../helpers/util/asyncHandler.js')
 const { instructionMessage, otherMsg, msgUpdate, timestamp, reminderText } = require('../helpers/templates/msgtemplates.js');
 
 
